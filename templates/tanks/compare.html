@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="compare-wrapper">
+
+    <a class="back-link" href="{{ url_for('tanks.list_tanks') }}">
+        ← Back to tanks
+    </a>
+
+    <h1 class="page-title">Tank Comparison</h1>
+
+    <div class="compare-grid">
+
+        <!-- LEFT -->
+        <div class="compare-card">
+            <h2>{{ left.name }}</h2>
+            {% if left.image %}
+            <img src="{{ url_for('static', filename='uploads/tanks/' + left.image) }}">
+            {% endif %}
+            <p>Tier {{ left.tier }} • {{ left.tank_class|capitalize }}</p>
+        </div>
+
+        <!-- STATS -->
+        <div class="compare-stats">
+            {% set stats = [
+                ("Firepower", left.firepower_rating, right.firepower_rating),
+                ("Armor", left.armor_rating, right.armor_rating),
+                ("Mobility", left.mobility_rating, right.mobility_rating)
+            ] %}
+            {% for label, l, r in stats %}
+            <div class="compare-row">
+                <span class="value {{ 'win' if l > r }}">{{ l }}</span>
+                <span class="label">{{ label }}</span>
+                <span class="value {{ 'win' if r > l }}">{{ r }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- RIGHT -->
+        <div class="compare-card">
+            <h2>{{ right.name }}</h2>
+            {% if right.image %}
+            <img src="{{ url_for('static', filename='uploads/tanks/' + right.image) }}">
+            {% endif %}
+            <p>Tier {{ right.tier }} • {{ right.tank_class|capitalize }}</p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

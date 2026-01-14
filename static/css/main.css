@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.tank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.tank-card {
+    border: 1px solid #444;
+    padding: 10px;
+    text-align: center;
+}
+
+.tank-card img {
+    max-width: 100%;
+}
+
+.tank-image {
+    max-width: 400px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.stat {
+    margin-bottom: 10px;
+}
+
+.bar {
+    background: #333;
+    height: 14px;
+    width: 300px;
+    border-radius: 4px;
+}
+
+.fill {
+    background: #4caf50;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.compare-card {
+    text-align: center;
+}
+
+.compare-card img {
+    max-width: 100%;
+}
+
+.compare-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.compare-row span {
+    width: 60px;
+    text-align: center;
+}
+
+.win {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px 1fr;
+    gap: 30px;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.compare-card {
+    background: #151515;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.compare-card img {
+    width: 100%;
+    max-width: 280px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.compare-stats {
+    background: #111;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.compare-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.compare-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #777;
+}
+
+.stat-value.win {
+    color: #4caf50;
+}
+
+.back-link {
+    color: #aaa;
+    text-decoration: none;
+}
+
+.page-title {
+    margin-top: 15px;
+}
