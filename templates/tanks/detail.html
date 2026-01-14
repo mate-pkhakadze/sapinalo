@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.tank-header {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.tank-header img {
+    width: 420px;
+    border-radius: 10px;
+    background: #111;
+}
+
+.ratings {
+    margin-bottom: 30px;
+}
+
+.stat {
+    margin-bottom: 15px;
+}
+
+.stat span {
+    display: block;
+    margin-bottom: 5px;
+    color: #aaa;
+}
+
+.bar {
+    width: 100%;
+    height: 14px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    border-radius: 10px;
+}
+
+.firepower { background: #c0392b; }
+.armor { background: #2980b9; }
+.mobility { background: #27ae60; }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.stats-box {
+    background: #151515;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.stats-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.stats-box li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.playstyle {
+    margin-top: 30px;
+    background: #151515;
+    padding: 20px;
+    border-radius: 10px;
+}
+</style>
+
+<div class="tank-detail">
+
+    <!-- HEADER -->
+    <div class="tank-header">
+        <img src="{{ url_for('static', filename='uploads/tanks/' + tank.image) }}">
+        <div>
+            <h1>{{ tank.name }}</h1>
+            <p>Tier {{ tank.tier }} • {{ tank.tank_class|upper }} • {{ tank.nation }}</p>
+            <p>{{ tank.role }}</p>
+        </div>
+    </div>
+
+    <!-- RATING BARS -->
+    <div class="ratings">
+        <div class="stat">
+            <span>Firepower</span>
+            <div class="bar">
+                <div class="fill firepower" style="width: {{ tank.firepower_rating }}%"></div>
+            </div>
+            <strong>{{ tank.firepower_rating }}/100</strong>
+        </div>
+
+        <div class="stat">
+            <span>Armor</span>
+            <div class="bar">
+                <div class="fill armor" style="width: {{ tank.armor_rating }}%"></div>
+            </div>
+            <strong>{{ tank.armor_rating }}/100</strong>
+        </div>
+
+        <div class="stat">
+            <span>Mobility</span>
+            <div class="bar">
+                <div class="fill mobility" style="width: {{ tank.mobility_rating }}%"></div>
+            </div>
+            <strong>{{ tank.mobility_rating }}/100</strong>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stats-box">
+            <h3>Gun & Firepower</h3>
+            <ul>
+                <li><span>Alpha Damage</span><strong>{{ tank.alpha_damage }}</strong></li>
+                <li><span>Penetration</span><strong>{{ tank.penetration }} mm</strong></li>
+                <li><span>Reload Time</span><strong>{{ tank.reload_time }} s</strong></li>
+                <li><span>Gun Caliber</span><strong>{{ tank.gun_caliber }} mm</strong></li>
+            </ul>
+        </div>
+
+        <div class="stats-box">
+            <h3>Mobility & Survivability</h3>
+            <ul>
+                <li><span>Hit Points</span><strong>{{ tank.hit_points }}</strong></li>
+                <li><span>Armor</span><strong>{{ tank.armor }}</strong></li>
+                <li><span>Top Speed</span><strong>{{ tank.top_speed }} km/h</strong></li>
+                <li><span>View Range</span><strong>{{ tank.view_range }} m</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PLAYSTYLE -->
+    <div class="playstyle">
+        <h3>How to Play</h3>
+        <p>{{ tank.playstyle }}</p>
+    </div>
+    <!-- EDIT BUTTON -->
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <a href="{{ url_for('tanks.edit_tank', slug=tank.slug) }}" class="btn btn-warning">
+        Edit Tank
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
