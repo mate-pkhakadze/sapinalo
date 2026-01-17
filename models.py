@@ -93,6 +93,37 @@ class Tank(db.Model):
         )
 
         return max(0, min(100, int(score)))
+    
+    @property
+    def view_range_rating(self):
+        if not self.view_range:
+            return 0
+
+        vr = max(300, min(445, self.view_range))
+
+        # Base score
+        if vr < 350:
+            # 300–350 → 0–40
+            base = ((vr - 300) / 50) * 40
+        else:
+            # 350–445 → 40–80
+            base = 40 + ((vr - 350) / 95) * 40
+
+        # Class bonus
+        class_bonus = {
+            "Light": 10,
+            "Medium": 7,
+            "Heavy": 4,
+            "TD": 4,
+            "SPG": 0
+        }.get(self.tank_class, 4)
+
+        # Tier bonus (very small, avoids low-tier zeros)
+        tier_bonus = (self.tier / 10) * 10
+
+        score = base + class_bonus + tier_bonus
+
+        return max(0, min(100, int(score)))
 
 
 

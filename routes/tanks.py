@@ -1,5 +1,5 @@
 from models import Tank
-from flask import Blueprint, render_template, redirect, url_for, abort, request
+from flask import Blueprint, render_template, redirect, url_for, abort, request, flash
 from flask_login import login_required, current_user
 from extensions import db, app
 from forms import TankForm
@@ -7,6 +7,8 @@ from os import path
 from slugify import slugify
 import os
 from werkzeug.utils import secure_filename
+
+
 tanks = Blueprint("tanks", __name__, url_prefix="/tanks")
 
 @tanks.route("/")
@@ -80,76 +82,73 @@ def tank_detail(slug):
     tank = Tank.query.filter_by(slug=slug).first_or_404()
     return render_template("tanks/detail.html", tank=tank)
 
-@tanks.route("/<slug>/edit", methods=["GET", "POST"])
+@tanks.route("/tank/<slug>/edit", methods=["GET", "POST"])
 @login_required
 def edit_tank(slug):
     if not current_user.is_admin:
-        abort(403)
+        flash("Access denied", "danger")
+        return redirect(url_for("tanks.list_tanks"))
 
     tank = Tank.query.filter_by(slug=slug).first_or_404()
-    form = TankForm(obj=tank)  # 👈 pre-fill form
+    form = TankForm(obj=tank)
 
     if form.validate_on_submit():
+
+        # --- temporarily remove image field ---
+        image_data = form.image.data
+        form.image.data = None
+
+        # populate everything EXCEPT image
         form.populate_obj(tank)
 
-        # image update (optional)
-        if form.image.data:
-            # delete old image
-            if tank.image:
-                old_path = path.join(
-                    app.root_path, "static", "uploads", "tanks", tank.image
-                )
-                if path.exists(old_path):
-                    os.remove(old_path)
+        # restore image field
+        form.image.data = image_data
 
-            filename = secure_filename(form.image.data.filename)
-            upload_path = path.join(
+        # --- handle image upload manually ---
+        if image_data and hasattr(image_data, "filename"):
+            ext = image_data.filename.rsplit(".", 1)[1].lower()
+            filename = f"{tank.slug}.{ext}"
+
+            upload_path = os.path.join(
                 app.root_path, "static", "uploads", "tanks", filename
             )
-            form.image.data.save(upload_path)
+
+            image_data.save(upload_path)
             tank.image = filename
 
-        tank.calculate_ratings()  # 🔥 IMPORTANT
         db.session.commit()
-
+        flash("Tank updated successfully", "success")
         return redirect(url_for("tanks.tank_detail", slug=tank.slug))
 
-    return render_template("tanks/edit.html", form=form, tank=tank)
+    return render_template("tanks/edit_tank.html", form=form, tank=tank)
 
 @tanks.route("/compare")
-def compare_tanks():
-    left_slug = request.args.get("left")
-    right_slug = request.args.get("right")
+def compare():
+    left_id = request.args.get("left", type=int)
+    right_id = request.args.get("right", type=int)
 
-    if not left_slug or not right_slug:
-        abort(400)
+    tanks = Tank.query.order_by(Tank.name).all()
 
-    left = Tank.query.filter_by(slug=left_slug).first_or_404()
-    right = Tank.query.filter_by(slug=right_slug).first_or_404()
+    tank1 = Tank.query.get(left_id) if left_id else None
+    tank2 = Tank.query.get(right_id) if right_id else None
 
     return render_template(
         "tanks/compare.html",
-        left=left,
-        right=right,
+        tanks=tanks,
+        tank1=tank1,
+        tank2=tank2
     )
 
-@tanks.route("/<slug>/delete", methods=["POST"])
+@tanks.route("/tank/<slug>/delete", methods=["POST"])
 @login_required
 def delete_tank(slug):
     if not current_user.is_admin:
-        abort(403)
+        flash("Access denied", "danger")
+        return redirect(url_for("tanks.list_tanks"))
 
     tank = Tank.query.filter_by(slug=slug).first_or_404()
-
-    # delete image file
-    if tank.image:
-        image_path = path.join(
-            app.root_path, "static", "uploads", "tanks", tank.image
-        )
-        if path.exists(image_path):
-            os.remove(image_path)
-
     db.session.delete(tank)
     db.session.commit()
 
+    flash("Tank deleted", "success")
     return redirect(url_for("tanks.list_tanks"))

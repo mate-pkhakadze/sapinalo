@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, redirect, url_for
 from config import Config
 from extensions import db, login_manager
 from routes.tanks import tanks
@@ -26,7 +26,7 @@ app = create_app()
 
 @app.route("/")
 def index():
-    return "WoT Hub running"
+    return redirect(url_for("tanks.list_tanks"))
 
 if __name__ == "__main__":
     app.run(debug=True)

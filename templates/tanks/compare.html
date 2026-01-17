@@ -1,52 +1,150 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="compare-wrapper">
+<style>
+/* === FIXED IMAGE LAYOUT === */
+.tank-img-wrapper {
+    width: 220px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin: 0 auto;
+}
 
-    <a class="back-link" href="{{ url_for('tanks.list_tanks') }}">
-        ← Back to tanks
-    </a>
+.tank-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
 
-    <h1 class="page-title">Tank Comparison</h1>
+/* === PROGRESS BARS === */
+.progress {
+    height: 10px;
+}
 
-    <div class="compare-grid">
+.progress-bar {
+    transition: width 0.4s ease;
+}
+</style>
 
-        <!-- LEFT -->
-        <div class="compare-card">
-            <h2>{{ left.name }}</h2>
-            {% if left.image %}
-            <img src="{{ url_for('static', filename='uploads/tanks/' + left.image) }}">
-            {% endif %}
-            <p>Tier {{ left.tier }} • {{ left.tank_class|capitalize }}</p>
-        </div>
+<div class="container mt-4">
 
-        <!-- STATS -->
-        <div class="compare-stats">
-            {% set stats = [
-                ("Firepower", left.firepower_rating, right.firepower_rating),
-                ("Armor", left.armor_rating, right.armor_rating),
-                ("Mobility", left.mobility_rating, right.mobility_rating)
-            ] %}
-            {% for label, l, r in stats %}
-            <div class="compare-row">
-                <span class="value {{ 'win' if l > r }}">{{ l }}</span>
-                <span class="label">{{ label }}</span>
-                <span class="value {{ 'win' if r > l }}">{{ r }}</span>
-            </div>
-            {% endfor %}
-        </div>
+<form method="get" class="row mb-4">
+  <div class="col">
+    <select name="left" class="form-select" required>
+      <option value="">Select first tank</option>
+      {% for tank in tanks %}
+        <option value="{{ tank.id }}"
+          {% if tank1 and tank.id == tank1.id %}selected{% endif %}>
+          {{ tank.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
 
-        <!-- RIGHT -->
-        <div class="compare-card">
-            <h2>{{ right.name }}</h2>
-            {% if right.image %}
-            <img src="{{ url_for('static', filename='uploads/tanks/' + right.image) }}">
-            {% endif %}
-            <p>Tier {{ right.tier }} • {{ right.tank_class|capitalize }}</p>
-        </div>
+  <div class="col">
+    <select name="right" class="form-select" required>
+      <option value="">Select second tank</option>
+      {% for tank in tanks %}
+        <option value="{{ tank.id }}"
+          {% if tank2 and tank.id == tank2.id %}selected{% endif %}>
+          {{ tank.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
 
+  <div class="col-2">
+    <button class="btn btn-primary w-100">Compare</button>
+  </div>
+</form>
+
+{% if tank1 and tank2 %}
+
+<!-- === HEADER === -->
+<div class="row text-center align-items-center mb-4">
+
+  <div class="col">
+    <div class="tank-img-wrapper">
+      <img src="{{ url_for('static', filename='uploads/tanks/' ~ tank1.image) }}"
+           class="tank-img">
     </div>
+    <h4>{{ tank1.name }}</h4>
+    <small class="text-muted">Tier {{ tank1.tier }}</small>
+  </div>
+
+  <div class="col-1">
+    <h3 class="fw-bold">VS</h3>
+  </div>
+
+  <div class="col">
+    <div class="tank-img-wrapper">
+      <img src="{{ url_for('static', filename='uploads/tanks/' ~ tank2.image) }}"
+           class="tank-img">
+    </div>
+    <h4>{{ tank2.name }}</h4>
+    <small class="text-muted">Tier {{ tank2.tier }}</small>
+  </div>
 
 </div>
 
+<!-- === STATS === -->
+{% set stats = [
+  ('Firepower', tank1.firepower_rating, tank2.firepower_rating),
+  ('Armor', tank1.armor_rating, tank2.armor_rating),
+  ('Mobility', tank1.mobility_rating, tank2.mobility_rating),
+  ('View Range', tank1.view_range_rating, tank2.view_range_rating)
+] %}
+
+{% for name, v1, v2 in stats %}
+
+{% set left_better = v1 > v2 %}
+{% set right_better = v2 > v1 %}
+{% set tie = v1 == v2 %}
+
+<div class="row align-items-center mb-3">
+
+  <!-- LEFT TANK -->
+  <div class="col-4 text-end fw-semibold
+              {% if left_better %}text-success{% endif %}">
+    {{ v1 }}
+    <div class="progress">
+      <div class="progress-bar
+                  {% if left_better %}bg-success{% else %}bg-secondary{% endif %}"
+           style="width: {{ v1 }}%;
+                  {% if left_better %}height: 14px;{% endif %}">
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT NAME -->
+  <div class="col-4 text-center fw-bold">
+    {{ name }}
+    {% if tie %}
+      <span class="text-muted">(Tie)</span>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT TANK -->
+  <div class="col-4 fw-semibold
+              {% if right_better %}text-success{% endif %}">
+    {{ v2 }}
+    <div class="progress">
+      <div class="progress-bar
+                  {% if right_better %}bg-success{% else %}bg-secondary{% endif %}"
+           style="width: {{ v2 }}%;
+                  {% if right_better %}height: 14px;{% endif %}">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endfor %}
+{% endif %}
+
+</div>
 {% endblock %}

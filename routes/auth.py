@@ -19,31 +19,15 @@ def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        hashed_pw = generate_password_hash(form.password.data)
-
         user = User(
             username=form.username.data,
-            password_hash=hashed_pw
+            password_hash=generate_password_hash(form.password.data)
         )
-
-        # Profile picture upload
-        if form.profile_image.data:
-            file = form.profile_image.data
-            filename = secure_filename(file.filename)
-
-            upload_path = os.path.join(
-                current_app.config["UPLOAD_FOLDER"],
-                "pfps",
-                filename
-            )
-
-            file.save(upload_path)
-            user.profile_image = f"uploads/pfps/{filename}"
 
         db.session.add(user)
         db.session.commit()
 
-        flash("Account created. You can now log in.")
+        flash("Account created successfully!", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("register.html", form=form)

@@ -81,7 +81,11 @@
 
     <!-- HEADER -->
     <div class="tank-header">
-        <img src="{{ url_for('static', filename='uploads/tanks/' + tank.image) }}">
+        {% if tank.image %}
+            <img src="{{ url_for('static', filename='uploads/tanks/' ~ tank.image) }}">
+        {% else %}
+            <img src="{{ url_for('static', filename='uploads/tanks/example.png') }}">
+        {% endif %}
         <div>
             <h1>{{ tank.name }}</h1>
             <p>Tier {{ tank.tier }} • {{ tank.tank_class|upper }} • {{ tank.nation }}</p>
